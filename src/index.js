@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { handleGetUserInfo } from "./controllers/user.controller.js";
 import { handleGetBookInfo } from "./controllers/book.controller.js";
+import { authenticateToken } from './auth/auth.middleware.js';
 
 dotenv.config();
 
@@ -28,17 +29,19 @@ app.use((req, res, next) => {
   next();
 });
 
-
-app.use(cors()); // cors 방식 허용
+app.use(cors()); // CORS 허용
 app.use(express.static("public")); // 정적 파일 접근
-app.use(express.json()); // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
+app.use(express.json()); // request의 본문을 JSON으로 해석
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/api/v1/user/:userId", handleGetUserInfo);
+// 토큰 인증이 필요한 경로
+app.get("/api/v1/user/:userId", authenticateToken, handleGetUserInfo);
+
+// 토큰 인증이 필요 없는 경로
 app.get("/api/v1/book/:bookId", handleGetBookInfo);
 
 /**
@@ -59,4 +62,3 @@ app.use((err, req, res, next) => {
 app.listen(port, "0.0.0.0", () => { // 모든 인터페이스에서 수신 대기
   console.log(`Example app listening on port ${port}`);
 });
-
