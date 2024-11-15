@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id     Int      @id @default(autoincrement())
+  name        String
+  student_num Int      @unique
+  email       String   @unique
+  phone       String?
+  created_at  DateTime @default(now())
+  rents       Rent[]   @relation("UserRents")
+}
+
+model Shelf {
+  shelf_id Int     @id @default(autoincrement())
+  location String
+  books    Book[]  @relation("ShelfBooks")
+}
+
+model Book {
+  book_id       Int       @id @default(autoincrement())
+  title         String
+  author        String
+  genre         String
+  published_date DateTime
+  status        BookStatus @default(BOGAN)
+  shelf_id      Int?
+  shelf         Shelf?     @relation("ShelfBooks", fields: [shelf_id], references: [shelf_id])
+  rents         Rent[]     @relation("BookRents")
+}
+
+model Rent {
+  rent_id     Int      @id @default(autoincrement())
+  user_id     Int
+  book_id     Int?
+  rent_date   DateTime @default(now())
+  return_date DateTime?
+
+  user        User     @relation("UserRents", fields: [user_id], references: [user_id])
+  book        Book?    @relation("BookRents", fields: [book_id], references: [book_id])
+}
+
+enum BookStatus {
+  BOGAN      // 보관중
+  DAEYONG    // 대여중
+  DONAN      // 도난
+}

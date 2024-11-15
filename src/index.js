@@ -1,6 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { handleGetUserInfo } from "./controllers/user.controller.js";
 
 dotenv.config();
 
@@ -35,6 +36,8 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+app.get("/api/v1/user/:userId", handleGetUserInfo);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어
