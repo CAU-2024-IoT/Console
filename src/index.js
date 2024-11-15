@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { handleGetUserInfo } from "./controllers/user.controller.js";
+import { handleGetBookInfo } from "./controllers/book.controller.js";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/v1/user/:userId", handleGetUserInfo);
+app.get("/api/v1/book/:bookId", handleGetBookInfo);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어
