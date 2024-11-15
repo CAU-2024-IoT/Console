@@ -6,8 +6,9 @@ export const authenticateToken = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: 'Access token required' });
   }
-
+  console.log(token);
   const decoded = verifyToken(token);
+  console.log(decoded)
   if (!decoded) {
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
