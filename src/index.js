@@ -1,10 +1,11 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { handleGetUserInfo } from "./controllers/user.controller.js";
-import { handleGetBookInfo } from "./controllers/book.controller.js";
+import { handleGetUserInfo, handleGetUsersInfo } from "./controllers/user.controller.js";
+import { handleGetBookInfo, handleGetBooksInfo } from "./controllers/book.controller.js";
 import { authenticateToken } from './auth/auth.middleware.js';
-
+import { handleRentBook } from "./controllers/rent.controller.js";
+import { handleReturnBook } from "./controllers/return.controller.js";
 dotenv.config();
 
 const app = express();
@@ -40,9 +41,12 @@ app.get("/", (req, res) => {
 
 // 토큰 인증이 필요한 경로
 app.get("/api/v1/user/:userId", authenticateToken, handleGetUserInfo);
-
+app.post("/api/v1/books/rent", authenticateToken, handleRentBook);
+app.post("/api/v1/books/return", authenticateToken, handleReturnBook);
 // 토큰 인증이 필요 없는 경로
 app.get("/api/v1/book/:bookId", handleGetBookInfo);
+app.get("/api/v1/books", handleGetBooksInfo);
+app.get("/api/v1/users", handleGetUsersInfo);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어

@@ -1,4 +1,4 @@
-import  {findBookInfo} from "../repositories/book.repository.js"
+import  {findBookInfo, findBooksInfo} from "../repositories/book.repository.js"
 import  {BookNotFoundError} from "../errors.js"
 
 export const getBookInfo = async (bookId) => {
@@ -10,4 +10,12 @@ export const getBookInfo = async (bookId) => {
       throw new BookNotFoundError("도서를 찾을 수 없습니다.", {"bookId" : bookId});
     }
     return bookInfo;
+};
+
+export const getBooksInfo = async () => {
+  const booksInfo = await findBooksInfo();
+  if (!booksInfo) {
+    throw new BookNotFoundError("도서가 없습니다.");
+  }
+  return booksInfo;
 };
