@@ -22,3 +22,16 @@ export const findUserInfo = async (userId) => {
     );
   }
 };
+
+
+export const findUsersInfo = async () => {
+  try {
+    const usersInfo = await prisma.user.findMany({
+    });
+    return usersInfo;
+  } catch (error) {
+    throw new Error(
+      `오류가 발생했어요. 요청을 확인해 주세요. (${error.message})`
+    );
+  }
+};

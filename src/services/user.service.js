@@ -1,4 +1,4 @@
-import  {findUserInfo} from "../repositories/user.repository.js"
+import  {findUserInfo, findUsersInfo} from "../repositories/user.repository.js"
 import  {UserNotFoundError} from "../errors.js"
 
 export const getUserInfo = async (userId) => {
@@ -10,4 +10,12 @@ export const getUserInfo = async (userId) => {
       throw new UserNotFoundError("사용자를 찾을 수 없습니다.", {"userId" : userId});
     }
     return userInfo;
+};
+
+export const getUsersInfo = async () => {
+  const usersInfo = await findUsersInfo();
+  if (!usersInfo) {
+    throw new UserNotFoundError("사용자가 없습니다.");
+  }
+  return usersInfo;
 };
