@@ -1,6 +1,9 @@
 import axios from "axios";
 
 export const returnToShelf = async (shelfId, bookId) => {
-  const response = await axios.post(`/api/v1/shelves/${shelfId}/books/${bookId}/return`);
+  const SHELF_URL = process.env.SHELF_BASE_URL+'/'+shelfId;
+  console.log(`${SHELF_URL}/books/${bookId}`);
+  
+  const response = await axios.get(`${SHELF_URL}/books/${bookId}`); /* to do /return 추가, post로 교체 */
   return response.data.success;
 };

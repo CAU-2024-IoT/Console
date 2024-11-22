@@ -83,8 +83,9 @@ const findBookShelf = async (bookId, preferredShelfId) => {
   // Step 1: 선호하는 책장 먼저 확인
   if (preferredShelfId) {
     const isBookExists = await checkBookInShelf(preferredShelfId, bookId);
-    //console.log(isBookExists);
+    console.log(isBookExists);
     if (isBookExists) {
+      console.log(preferredShelfId)
       return preferredShelfId;
     }
   }
@@ -113,10 +114,10 @@ export const rentBook = async (dto) => {
     }
     console.log(book);
     // Step 2: 책이 위치한 책장 탐색
-    const shelfId = await findBookShelf(book.book_id, book.shelf_id);
+    const shelfId = await findBookShelf(bookId, book.shelf_id);
 
     // Step 3: 책장 대여 요청
-    const rentResult = await rentRequest(shelfId, book.bookId);
+    const rentResult = await rentRequest(shelfId, bookId);
     if (!rentResult) {
       throw new Error("Failed to rent book from shelf.");
     }
