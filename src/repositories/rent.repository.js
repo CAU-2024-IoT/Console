@@ -23,7 +23,7 @@ export const createRentRecord = async ({ user_id, book_id, rent_date = new Date(
     }
   };
 
-const createRentalRecord = async (bookId, userId) => {
+export const createRentalRecord = async (bookId, userId) => {
   const rentInfo = {
     book_id: bookId,
     user_id: userId,
