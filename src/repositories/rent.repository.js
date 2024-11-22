@@ -22,3 +22,18 @@ export const createRentRecord = async ({ user_id, book_id, rent_date = new Date(
       throw new Error("Failed to create rent record");
     }
   };
+
+const createRentalRecord = async (bookId, userId) => {
+  const rentInfo = {
+    book_id: bookId,
+    user_id: userId,
+    rentDate: new Date(),
+    status: '대여중',
+  };
+
+  const result = await createRentRecord(rentInfo);
+  if (!result) {
+    throw new Error("Failed to create rent record.");
+  }
+  return rentInfo;
+};

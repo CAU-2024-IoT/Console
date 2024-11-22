@@ -1,6 +1,9 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { Server } from "socket.io"; // 추가
+import http from "http"; // 추가
+
 import { handleGetUserInfo, handleGetUsersInfo } from "./controllers/user.controller.js";
 import { handleGetBookInfo, handleGetBooksInfo } from "./controllers/book.controller.js";
 import { authenticateToken } from './auth/auth.middleware.js';
@@ -9,6 +12,13 @@ import { handleReturnBook } from "./controllers/return.controller.js";
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app); // http 서버 생성
+const io = new Server(server, {
+  cors: {
+    origin: "*", // 모든 출처 허용
+    methods: ["GET", "POST"]
+  }
+});
 const port = process.env.PORT;
 
 /**
@@ -39,6 +49,21 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+// 소켓 통신 이벤트 설정
+io.on("connection", (socket) => {
+  console.log("클라이언트가 연결되었습니다:", socket.id);
+
+  // 메시지 수신 예제
+  socket.on("message", (msg) => {
+    console.log("수신된 메시지:", msg);
+    socket.emit("response", `서버가 받은 메시지: ${msg}`); // 클라이언트로 응답
+  });
+
+  socket.on("disconnect", () => {
+    console.log("클라이언트 연결 해제:", socket.id);
+  });
+});
+
 // 토큰 인증이 필요한 경로
 app.get("/api/v1/user/:userId", authenticateToken, handleGetUserInfo);
 app.post("/api/v1/books/rent", authenticateToken, handleRentBook);
@@ -63,6 +88,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, "0.0.0.0", () => { // 모든 인터페이스에서 수신 대기
+server.listen(port, "0.0.0.0", () => { // 모든 인터페이스에서 수신 대기
   console.log(`Example app listening on port ${port}`);
 });
