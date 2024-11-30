@@ -18,6 +18,6 @@ export const rentRequest = async (shelfId, bookId) => {
   // 워킹 서버로 대여 요청 전송
   const SHELF_URL = process.env.SHELF_BASE_URL+'/'+shelfId;
   console.log(`${SHELF_URL}/books/${bookId}`);// /rent 붙여야함
-  const response = await axios.get(`${SHELF_URL}/books/${bookId}`);//post로 바꿔야함
+  const response = await axios.get(`${SHELF_URL}/books/${bookId}/rent`);//post로 바꿔야함
   return response.data.success;
 };
