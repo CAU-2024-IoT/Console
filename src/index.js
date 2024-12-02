@@ -1,15 +1,10 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { Server } from "socket.io"; // 추가
-import http from "http"; // 추가
+import { Server } from "socket.io";
+import http from "http";
 import WebSocket from "ws"; // WebSocket 추가
-
-import { handleGetUserInfo, handleGetUsersInfo } from "./controllers/user.controller.js";
-import { handleGetBookInfo, handleGetBooksInfo } from "./controllers/book.controller.js";
-import { authenticateToken } from './auth/auth.middleware.js';
-import { handleRentBook } from "./controllers/rent.controller.js";
-import { handleReturnBook } from "./controllers/return.controller.js";
+import {handleSeatSensor, handleBrightnessSensor} from "./controllers/sensor.controller.js"
 dotenv.config();
 
 const app = express();
@@ -17,13 +12,43 @@ const server = http.createServer(app); // http 서버 생성
 const io = new Server(server, {
   cors: {
     origin: "*", // 모든 출처 허용
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 const port = process.env.PORT || 3000;
 
+// 외부 WebSocket 서버 주소
+const EXTERNAL_WS_URL = process.env.EXTERNAL_WS_URL;
+// WebSocket 클라이언트 (외부 서버와의 통신)
+let externalWs = null;
 // WebSocket 서버 설정 (Flask 서버와의 통신)
 const wsServer = new WebSocket.Server({ port: 2026 });
+
+
+
+function connectToExternalServer() {
+  try {
+    externalWs = new WebSocket(EXTERNAL_WS_URL);
+
+    externalWs.on("open", () => {
+      console.log(`Connected to external WebSocket server: ${EXTERNAL_WS_URL}`);
+    });
+
+    externalWs.on("error", (err) => {
+      console.error("Error connecting to external WebSocket server:", err.message);
+    });
+
+    externalWs.on("close", () => {
+      console.log("Disconnected from external WebSocket server. Reconnecting...");
+      setTimeout(connectToExternalServer, 5000); // 5초 후 재연결
+    });
+  } catch (err) {
+    console.error("Failed to connect to external WebSocket server:", err.message);
+  }
+}
+
+// 외부 WebSocket 서버 연결 시도
+connectToExternalServer();
 
 wsServer.on("connection", (ws) => {
   console.log("Flask 서버가 WebSocket으로 연결되었습니다.");
@@ -32,10 +57,18 @@ wsServer.on("connection", (ws) => {
     try {
       const data = JSON.parse(message);
       console.log("Flask 서버로부터 받은 데이터:", data);
+	  if (data.type === 'seat_sensor') {
+        handleSeatSensor(data);
+      } else if (data.type === 'brightness_sensor') {
+        //handleBrightnessSensor(data);
+      } else {
+        console.error("Unknown data type received:", data.type);
+      }
+      // Socket.IO를 통해 클라이언트에 데이터 브로드캐스트
+      io.emit("flask_data", data);
 
-      // 필요한 데이터 처리 로직
-      // 예: 데이터 저장, 다른 클라이언트에 브로드캐스트 등
-      io.emit("flask_data", data); // Socket.IO를 통해 클라이언트에 데이터 브로드캐스트
+      // 외부 WebSocket 서버로 데이터 전송
+      
     } catch (err) {
       console.error("WebSocket 메시지 처리 오류:", err.message);
     }
@@ -82,6 +115,7 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("클라이언트가 연결되었습니다:", socket.id);
 
+  // 메시지 수신 및 응답 (테스트용)
   socket.on("message", (msg) => {
     console.log("수신된 메시지:", msg);
     socket.emit("response", `서버가 받은 메시지: ${msg}`);
@@ -92,30 +126,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// 토큰 인증이 필요한 경로
-app.get("/api/v1/user/:userId", authenticateToken, handleGetUserInfo);
-app.post("/api/v1/books/rent", authenticateToken, handleRentBook);
-app.post("/api/v1/books/return", authenticateToken, handleReturnBook);
-// 토큰 인증이 필요 없는 경로
-app.get("/api/v1/book/:bookId", handleGetBookInfo);
-app.get("/api/v1/books", handleGetBooksInfo);
-app.get("/api/v1/users", handleGetUsersInfo);
-
-/**
- * 전역 오류를 처리하기 위한 미들웨어
- */
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  console.log(err);
-  res.status(err.statusCode || 500).error({
-    errorCode: err.errorCode || "unknown",
-    reason: err.reason || err.message || null,
-    data: err.data || null,
-  });
-});
-
-server.listen(port, "0.0.0.0", () => { // 모든 인터페이스에서 수신 대기
+server.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening on port ${port}`);
 });
