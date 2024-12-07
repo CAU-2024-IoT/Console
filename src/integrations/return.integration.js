@@ -5,5 +5,6 @@ export const returnToShelf = async (shelfId, bookId) => {
   console.log(`${SHELF_URL}/books/${bookId}`);
   
   const response = await axios.get(`${SHELF_URL}/books/${bookId}/return`); /* to do /return 추가, post로 교체 */
+  console.log(response.data);
   return response.data.success;
 };

@@ -16,15 +16,15 @@ const findBookShelf = async (bookId, preferredShelfId) => {
     }
   }
 
-  // Step 2: 전체 책장 탐색
-  const shelfNum = await countShelves();
-  for (let i = 1; i <= shelfNum; i++) {
-    if (i === preferredShelfId) continue; // 이미 확인한 책장은 건너뛰기
-    const isBookExists = await checkBookInShelf(i, bookId);
-    if (isBookExists) {
-      return i;
-    }
-  }
+  // // Step 2: 전체 책장 탐색
+  // const shelfNum = await countShelves();
+  // for (let i = 1; i <= shelfNum; i++) {
+  //   if (i === preferredShelfId) continue; // 이미 확인한 책장은 건너뛰기
+  //   const isBookExists = await checkBookInShelf(i, bookId);
+  //   if (isBookExists) {
+  //     return i;
+  //   }
+  // }
 
   throw new Error("Book not found in any shelf.");
 };
@@ -47,13 +47,14 @@ export const rentBook = async (dto) => {
     if (!rentResult) {
       throw new Error("Failed to rent book from shelf.");
     }
+    console.log(rentResult);
 
     // Step 4: 도서 상태 업데이트
     await updateBookState(bookId, 'DAEYONG');
 
     // Step 5: 대여 기록 생성 및 반환
     const rentInfo = await createRentalRecord(bookId, userId);
-    return rentInfo;
+    return rentResult;
 
   } catch (error) {
     console.error(`Error renting book: ${error.message}`);

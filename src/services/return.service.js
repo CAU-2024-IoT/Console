@@ -40,10 +40,7 @@ export const returnBook = async (dto) => {
 
     // 최종 반환 데이터 생성
     return {
-      book_id: bookId,
-      user_id: userId,
-      status: 'BOGAN',
-      returnDate: returnInfo.returnDate,
+      shelfReturnResult 
     };
 
   } catch (error) {

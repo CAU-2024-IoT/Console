@@ -7,11 +7,11 @@ import http from "http";
 import WebSocket from "ws"; // WebSocket 추가
 import {handleSeatSensor, handleBrightnessSensor} from "./controllers/sensor.controller.js"
 import { handleGetUserInfo, handleGetUsersInfo } from "./controllers/user.controller.js";
-import { handleGetBookInfo, handleGetBooksInfo } from "./controllers/book.controller.js";
+import { handleGetBookInfo, handleGetBooksInfo, handleTaskDone } from "./controllers/book.controller.js";
 import { authenticateToken } from './auth/auth.middleware.js';
 import { handleRentBook } from "./controllers/rent.controller.js";
 import { handleReturnBook } from "./controllers/return.controller.js";
-
+import { handleGate } from "./controllers/gate.controller.js";
 dotenv.config();
 
 const app = express();
@@ -89,7 +89,6 @@ wsServer.on("connection", (ws) => {
     console.error("WebSocket 에러:", err.message);
   });
 });
-const port = process.env.PORT;
 
 
 /**
@@ -144,17 +143,9 @@ app.post("/api/v1/books/return", authenticateToken, handleReturnBook);
 app.get("/api/v1/book/:bookId", handleGetBookInfo);
 app.get("/api/v1/books", handleGetBooksInfo);
 app.get("/api/v1/users", handleGetUsersInfo);
+app.get("/gate", handleGate);
+app.post("/api/v1/books/done", handleTaskDone);
 
-  // 메시지 수신 및 응답 (테스트용)
-  socket.on("message", (msg) => {
-    console.log("수신된 메시지:", msg);
-    socket.emit("response", `서버가 받은 메시지: ${msg}`);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("클라이언트 연결 해제:", socket.id);
-  });
-});
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening on port ${port}`);
